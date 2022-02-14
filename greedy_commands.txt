@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#find warp from dilated to regular heart
+greedy -d 3 -i heart.nii.gz heart_dilated.nii.gz  -o dilated_warp.nii.gz 
+
+#apply the warp
+greedy -d 3 -r broken_warp.nii.gz -rf heart.nii.gz  -rm heart_broken.nii.gz heart_broken_warped.nii.gz -ri NN
+
+#find warp from broken heart to regular heart
+greedy -d 3 -i heart.nii.gz heart_broken.nii.gz  -o broken_warp.nii.gz 
+
+#apply the warp
+greedy -d 3 -r broken_warp.nii.gz -rf heart.nii.gz -ri NN  -rm heart_broken.nii.gz heart_broken_warped.nii.gz 
+
+#find the warp with less regularization
+greedy -d 3 -i heart.nii.gz heart_broken.nii.gz  -o broken_warp_lesssmooth.nii.gz  -s 0.8vox 0.3vox
+
+#apply this new warp
+greedy -d 3 -r broken_warp_lesssmooth.nii.gz -rf heart.nii.gz -ri NN  -rm heart_broken.nii.gz heart_broken_warpedlesssmooth.nii.gz 
+
+
+
+#EXTRA:
+
+#warp using stationary velocity mode
+greedy -d 3 -i heart.nii.gz heart_dilated.nii.gz -sv -o dilated_sv_warp.nii.gz -oroot dilated_sv_warp_v0.nii.gz
+
+#visualize the images and warps 
+itksnap -g heart.nii.gz -o dilated_warp.nii.gz -s heart_dilated.nii.gz
+ 
